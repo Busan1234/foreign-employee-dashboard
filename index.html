@@ -438,8 +438,10 @@ select{cursor:pointer}
 // ─────────────────────────────────────────────
 //  DATA  (นำเข้าจาก Google Sheet ทุก Sheet)
 // ─────────────────────────────────────────────
-let DB = [
-  {
+let DB =
+JSON.parse(localStorage.getItem('employees'))
+||
+defaultData;
     id:'EMP001', title:'Mr.', firstName:'THIAGO', middleName:'', lastName:'RODRIGUES DA SILVA',
     gender:'M', nationality:'BRAZILIAN', birthDate:'1996-01-06',
     wp:{ issueDate:'2025-09-08', expiryDate:'2026-05-31', status:'Under Renewal', caseStatus:'appointment', assignedTo:'', nextAction:'', notes:'' },
