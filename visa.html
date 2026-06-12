@@ -1,0 +1,1019 @@
+cat > /mnt/user-data/outputs/foreign_employee_dashboard.html << 'HTMLEOF'
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foreign Employee System — HR Dashboard</title>
+<style>
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface2: #f9f8f6;
+  --border: rgba(0,0,0,0.09);
+  --border-md: rgba(0,0,0,0.16);
+  --text: #1c1c1a;
+  --text-2: #65645f;
+  --text-3: #9a9a93;
+  --blue: #185fa5; --blue-bg: #e6f1fb; --blue-t: #0c447c;
+  --green: #3b6d11; --green-bg: #eaf3de; --green-t: #27500a;
+  --amber: #854f0b; --amber-bg: #faeeda; --amber-t: #633806;
+  --red: #a32d2d; --red-bg: #fcebeb; --red-t: #791f1f;
+  --gray-bg: #f1efe8; --gray-t: #444441;
+  --purple-bg: #eeedfe; --purple-t: #3c3489;
+  --r: 10px; --r-sm: 6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+.app{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:216px;min-width:216px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden}
+.sidebar-logo{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
+.logo-mark{font-size:20px;margin-bottom:4px}
+.logo-title{font-size:13px;font-weight:600;color:var(--text)}
+.logo-sub{font-size:11px;color:var(--text-3);margin-top:1px}
+.sidebar-nav{padding:10px 8px;flex:1;overflow-y:auto}
+.nav-group-label{font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;padding:10px 8px 3px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--r-sm);cursor:pointer;color:var(--text-2);font-size:13px;transition:background .12s;margin-bottom:1px;user-select:none}
+.nav-item:hover{background:var(--bg)}
+.nav-item.active{background:var(--blue-bg);color:var(--blue-t);font-weight:500}
+.nav-icon{width:17px;text-align:center;font-size:14px;flex-shrink:0}
+.sidebar-footer{padding:10px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text-3)}
+
+/* MAIN */
+.main{flex:1;overflow:auto;min-width:0}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 26px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-title{font-size:15px;font-weight:500}
+.topbar-right{display:flex;gap:8px;align-items:center}
+.last-update{font-size:11px;color:var(--text-3)}
+.content{padding:22px 26px}
+.page{display:none}.page.active{display:block}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:var(--r-sm);border:1px solid var(--border-md);background:var(--surface);color:var(--text);font-size:12px;font-weight:500;cursor:pointer;transition:background .12s;white-space:nowrap;font-family:inherit}
+.btn:hover{background:var(--bg)}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-primary:hover{background:#0c447c}
+.btn-danger{background:var(--red-bg);color:var(--red-t);border-color:#f7c1c1}
+.btn-danger:hover{background:#f7c1c1}
+.btn-sm{padding:4px 9px;font-size:11px}
+.btn-xs{padding:3px 7px;font-size:10px}
+
+/* STAT GRID */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.stat-label{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:5px}
+.stat-value{font-size:28px;font-weight:500;line-height:1;margin-bottom:3px}
+.stat-sub{font-size:11px;color:var(--text-3)}
+.stat-sub .d{color:var(--red);font-weight:600}
+.stat-sub .w{color:var(--amber);font-weight:600}
+.stat-sub .g{color:var(--green);font-weight:600}
+
+/* ALERT */
+.alert-row{display:flex;align-items:flex-start;gap:9px;padding:9px 13px;border-radius:var(--r-sm);margin-bottom:5px;font-size:12px;line-height:1.5}
+.alert-row.danger{background:var(--red-bg);color:var(--red-t);border-left:3px solid #e24b4a}
+.alert-row.warn{background:var(--amber-bg);color:var(--amber-t);border-left:3px solid #ef9f27}
+.alert-row.info{background:var(--purple-bg);color:var(--purple-t);border-left:3px solid #7f77dd}
+.alert-icon{font-size:13px;flex-shrink:0;margin-top:1px}
+
+/* CARDS */
+.section-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:18px;overflow:hidden}
+.section-header{padding:13px 17px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.section-title{font-size:13px;font-weight:600}
+.section-sub{font-size:11px;color:var(--text-3);margin-top:1px}
+
+/* TABLE */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{background:var(--surface2);padding:8px 14px;text-align:left;font-size:10.5px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+
+/* BADGE */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:500;white-space:nowrap}
+.b-active{background:var(--green-bg);color:var(--green-t)}
+.b-warn{background:var(--amber-bg);color:var(--amber-t)}
+.b-expired,.b-overdue{background:var(--red-bg);color:var(--red-t)}
+.b-renewal{background:var(--purple-bg);color:var(--purple-t)}
+.b-approved{background:var(--blue-bg);color:var(--blue-t)}
+.b-submitted{background:var(--gray-bg);color:var(--gray-t)}
+.b-upcoming{background:var(--amber-bg);color:var(--amber-t)}
+.b-normal{background:var(--green-bg);color:var(--green-t)}
+.b-info{background:var(--blue-bg);color:var(--blue-t)}
+
+/* AVATAR */
+.avatar{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;background:var(--blue-bg);color:var(--blue-t);flex-shrink:0}
+.av-french{background:var(--amber-bg);color:var(--amber-t)}
+.emp-cell{display:flex;align-items:center;gap:9px}
+.emp-name{font-weight:500;font-size:12.5px}
+.emp-id{font-size:10px;color:var(--text-3)}
+
+/* FILTER */
+.filter-bar{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+input[type=text],input[type=date],select,textarea{padding:6px 11px;border:1px solid var(--border-md);border-radius:var(--r-sm);background:var(--surface);color:var(--text);font-size:12px;outline:none;transition:border-color .12s;font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:var(--blue)}
+input[type=text]{min-width:200px}
+select{cursor:pointer}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--r);width:620px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 8px 36px rgba(0,0,0,.18)}
+.modal-sm{width:400px}
+.modal-header{padding:16px 20px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:14px;font-weight:600}
+.modal-body{padding:18px 20px}
+.modal-footer{padding:13px 20px 16px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.close-btn{background:none;border:none;cursor:pointer;color:var(--text-3);font-size:17px;line-height:1;padding:2px}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:10.5px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em}
+.form-group input,.form-group select,.form-group textarea{width:100%}
+.form-section{font-size:11px;font-weight:600;color:var(--text-2);border-bottom:1px solid var(--border);padding-bottom:5px;margin-bottom:2px;grid-column:1/-1;margin-top:6px}
+
+/* PROGRESS BAR */
+.pbar{height:5px;border-radius:3px;background:var(--border);overflow:hidden;margin-top:3px}
+.pbar-fill{height:100%;border-radius:3px}
+
+/* TABS */
+.tab-bar{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.tab{padding:8px 16px;font-size:12px;font-weight:500;color:var(--text-2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .12s}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--blue-t);border-bottom-color:var(--blue)}
+
+.empty{text-align:center;padding:32px;color:var(--text-3);font-size:13px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">🌐</div>
+    <div class="logo-title">Foreign Employee</div>
+    <div class="logo-sub">HR Management System</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">เมนูหลัก</div>
+    <div class="nav-item active" onclick="nav('dashboard')"><span class="nav-icon">📊</span>ภาพรวม</div>
+    <div class="nav-item" onclick="nav('employees')"><span class="nav-icon">👥</span>พนักงาน</div>
+    <div class="nav-group-label">เอกสาร</div>
+    <div class="nav-item" onclick="nav('workpermit')"><span class="nav-icon">📋</span>ใบอนุญาตทำงาน</div>
+    <div class="nav-item" onclick="nav('visa')"><span class="nav-icon">🛂</span>วีซ่า</div>
+    <div class="nav-item" onclick="nav('reporting')"><span class="nav-icon">📌</span>รายงานตัว 90 วัน</div>
+    <div class="nav-group-label">อื่น ๆ</div>
+    <div class="nav-item" onclick="nav('alerts')"><span class="nav-icon">🔔</span>การแจ้งเตือน</div>
+  </nav>
+  <div class="sidebar-footer">v2.0 · ข้อมูลจาก Google Sheet</div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="page-title">ภาพรวมระบบ</div>
+    <div class="topbar-right">
+      <span class="last-update" id="last-update"></span>
+      <button class="btn btn-primary" onclick="openAddEmp()">＋ เพิ่มพนักงาน</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="page active" id="page-dashboard">
+      <div class="stat-grid" id="stat-grid"></div>
+      <div id="top-alerts" style="margin-bottom:18px"></div>
+      <div class="two-col">
+        <div class="section-card">
+          <div class="section-header">
+            <div><div class="section-title">เอกสารใกล้หมดอายุ / เกินกำหนด</div><div class="section-sub">ภายใน 90 วัน</div></div>
+          </div>
+          <div id="expiry-list"></div>
+        </div>
+        <div class="section-card">
+          <div class="section-header">
+            <div><div class="section-title">สรุปสถานะเอกสาร</div></div>
+          </div>
+          <div id="doc-summary" style="padding:14px 17px"></div>
+        </div>
+      </div>
+      <div class="section-card">
+        <div class="section-header">
+          <div><div class="section-title">รายชื่อพนักงานทั้งหมด</div></div>
+          <button class="btn btn-sm" onclick="nav('employees')">ดูทั้งหมด →</button>
+        </div>
+        <div class="table-wrap"><table><thead><tr>
+          <th>พนักงาน</th><th>สัญชาติ</th><th>Work Permit</th><th>Case</th><th>วีซ่า</th><th>Case</th><th>รายงานตัว</th><th>จัดการ</th>
+        </tr></thead><tbody id="dash-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ===== EMPLOYEES ===== -->
+    <div class="page" id="page-employees">
+      <div class="filter-bar">
+        <input type="text" id="emp-q" placeholder="🔍 ค้นหาชื่อ หรือสัญชาติ..." oninput="renderEmp()">
+        <select id="emp-nat" onchange="renderEmp()">
+          <option value="">ทุกสัญชาติ</option>
+          <option value="BRAZILIAN">บราซิล</option>
+          <option value="FRENCH">ฝรั่งเศส</option>
+        </select>
+        <button class="btn btn-primary" onclick="openAddEmp()">＋ เพิ่มพนักงาน</button>
+      </div>
+      <div class="section-card">
+        <div class="table-wrap"><table><thead><tr>
+          <th>#</th><th>ชื่อ-นามสกุล</th><th>สัญชาติ</th><th>เพศ</th><th>วันเกิด</th>
+          <th>WP Status</th><th>Visa Status</th><th>Report Status</th><th>จัดการ</th>
+        </tr></thead><tbody id="emp-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ===== WORK PERMIT ===== -->
+    <div class="page" id="page-workpermit">
+      <div class="filter-bar">
+        <input type="text" id="wp-q" placeholder="🔍 ค้นหา..." oninput="renderWP()">
+        <select id="wp-status-f" onchange="renderWP()">
+          <option value="">ทุกสถานะ Visa Status</option>
+          <option value="Under Renewal">Under Renewal</option>
+          <option value="Active">Active</option>
+          <option value="Expired">Expired</option>
+        </select>
+        <select id="wp-case-f" onchange="renderWP()">
+          <option value="">ทุก Case Status</option>
+          <option value="appointment">Appointment</option>
+          <option value="Submitted">Submitted</option>
+          <option value="Approved">Approved</option>
+        </select>
+      </div>
+      <div class="section-card">
+        <div class="section-header"><div class="section-title">ใบอนุญาตทำงาน (Work Permit)</div></div>
+        <div class="table-wrap"><table><thead><tr>
+          <th>พนักงาน</th><th>Issue Date</th><th>Expiry Date</th><th>วันที่เหลือ</th>
+          <th>Status</th><th>Case Status</th><th>Assigned To</th><th>Next Action</th><th>Notes</th><th>จัดการ</th>
+        </tr></thead><tbody id="wp-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ===== VISA ===== -->
+    <div class="page" id="page-visa">
+      <div class="filter-bar">
+        <input type="text" id="visa-q" placeholder="🔍 ค้นหา..." oninput="renderVisa()">
+        <select id="visa-status-f" onchange="renderVisa()">
+          <option value="">ทุกสถานะ</option>
+          <option value="Active">Active</option>
+          <option value="Under Renewal">Under Renewal</option>
+          <option value="Expired">Expired</option>
+        </select>
+        <select id="visa-case-f" onchange="renderVisa()">
+          <option value="">ทุก Case Status</option>
+          <option value="Approved">Approved</option>
+          <option value="Submitted">Submitted</option>
+        </select>
+      </div>
+      <div class="section-card">
+        <div class="section-header"><div class="section-title">วีซ่า (Visa)</div></div>
+        <div class="table-wrap"><table><thead><tr>
+          <th>พนักงาน</th><th>Visa Type</th><th>Issue Date</th><th>Expiry Date</th><th>วันที่เหลือ</th>
+          <th>Visa Status</th><th>Case Status</th><th>Assigned To</th><th>Next Action</th><th>Notes</th><th>จัดการ</th>
+        </tr></thead><tbody id="visa-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ===== 90 DAYS REPORT ===== -->
+    <div class="page" id="page-reporting">
+      <div class="filter-bar">
+        <input type="text" id="rpt-q" placeholder="🔍 ค้นหา..." oninput="renderReport()">
+        <select id="rpt-status-f" onchange="renderReport()">
+          <option value="">ทุกสถานะ</option>
+          <option value="Normal">Normal</option>
+          <option value="Upcoming">Upcoming</option>
+          <option value="Overdue">Overdue</option>
+        </select>
+      </div>
+      <div class="section-card">
+        <div class="section-header"><div class="section-title">การรายงานตัว 90 วัน (TM47)</div></div>
+        <div class="table-wrap"><table><thead><tr>
+          <th>พนักงาน</th><th>Last Report Date</th><th>Next Report Date</th><th>วันที่เหลือ</th>
+          <th>Status</th><th>Notes</th><th>จัดการ</th>
+        </tr></thead><tbody id="rpt-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ===== ALERTS ===== -->
+    <div class="page" id="page-alerts">
+      <div class="section-card">
+        <div class="section-header"><div class="section-title">🔔 การแจ้งเตือนทั้งหมด</div></div>
+        <div id="all-alerts" style="padding:8px 16px 16px"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ===== MODAL: Add/Edit Employee ===== -->
+<div class="modal-overlay" id="m-emp">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="m-emp-title">เพิ่มพนักงานใหม่</div>
+      <button class="close-btn" onclick="closeM('m-emp')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-section">ข้อมูลส่วนตัว</div>
+        <div class="form-group"><label class="form-label">Title</label>
+          <select id="e-title"><option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>Dr.</option></select></div>
+        <div class="form-group"><label class="form-label">สัญชาติ</label>
+          <input type="text" id="e-nat" placeholder="THAI, BRAZILIAN..."></div>
+        <div class="form-group"><label class="form-label">First Name</label>
+          <input type="text" id="e-fn" placeholder="ชื่อ"></div>
+        <div class="form-group"><label class="form-label">Middle Name</label>
+          <input type="text" id="e-mn" placeholder="ถ้ามี"></div>
+        <div class="form-group"><label class="form-label">Last Name</label>
+          <input type="text" id="e-ln" placeholder="นามสกุล"></div>
+        <div class="form-group"><label class="form-label">Gender</label>
+          <select id="e-gen"><option value="M">M (ชาย)</option><option value="F">F (หญิง)</option></select></div>
+        <div class="form-group"><label class="form-label">Birth Date</label>
+          <input type="date" id="e-bdate"></div>
+
+        <div class="form-section">Work Permit</div>
+        <div class="form-group"><label class="form-label">Issue Date</label>
+          <input type="date" id="e-wp-iss"></div>
+        <div class="form-group"><label class="form-label">Expiry Date</label>
+          <input type="date" id="e-wp-exp"></div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select id="e-wp-st">
+            <option>Active</option><option>Under Renewal</option><option>Expired</option>
+          </select></div>
+        <div class="form-group"><label class="form-label">Case Status</label>
+          <select id="e-wp-cs">
+            <option>Submitted</option><option>appointment</option><option>Approved</option>
+          </select></div>
+        <div class="form-group"><label class="form-label">Assigned To</label>
+          <input type="text" id="e-wp-assigned"></div>
+        <div class="form-group"><label class="form-label">Next Action Date</label>
+          <input type="date" id="e-wp-next"></div>
+        <div class="form-group full"><label class="form-label">Notes</label>
+          <input type="text" id="e-wp-notes" placeholder="หมายเหตุ"></div>
+
+        <div class="form-section">Visa</div>
+        <div class="form-group"><label class="form-label">Visa Type</label>
+          <select id="e-visa-type">
+            <option>Non-B "1 year"</option><option>Non-B "2 year"</option>
+            <option>Non-O</option><option>Non-IM</option><option>Tourist</option>
+          </select></div>
+        <div class="form-group"><label class="form-label">Issue Date</label>
+          <input type="date" id="e-visa-iss"></div>
+        <div class="form-group"><label class="form-label">Expiry Date</label>
+          <input type="date" id="e-visa-exp"></div>
+        <div class="form-group"><label class="form-label">Visa Status</label>
+          <select id="e-visa-st">
+            <option>Active</option><option>Under Renewal</option><option>Expired</option>
+          </select></div>
+        <div class="form-group"><label class="form-label">Case Status</label>
+          <select id="e-visa-cs">
+            <option>Approved</option><option>Submitted</option>
+          </select></div>
+        <div class="form-group"><label class="form-label">Assigned To</label>
+          <input type="text" id="e-visa-assigned"></div>
+        <div class="form-group"><label class="form-label">Next Action Date</label>
+          <input type="date" id="e-visa-next"></div>
+        <div class="form-group full"><label class="form-label">Notes</label>
+          <input type="text" id="e-visa-notes"></div>
+
+        <div class="form-section">รายงานตัว 90 วัน</div>
+        <div class="form-group"><label class="form-label">Last Report Date</label>
+          <input type="date" id="e-rpt-last"></div>
+        <div class="form-group"><label class="form-label">Notes</label>
+          <input type="text" id="e-rpt-notes"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeM('m-emp')">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveEmp()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: Edit Doc ===== -->
+<div class="modal-overlay" id="m-doc">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title" id="m-doc-title">แก้ไขเอกสาร</div>
+      <button class="close-btn" onclick="closeM('m-doc')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid" id="doc-form-content"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeM('m-doc')">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveDoc()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: Confirm ===== -->
+<div class="modal-overlay" id="m-confirm">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title">ยืนยันการลบ</div>
+      <button class="close-btn" onclick="closeM('m-confirm')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7" id="confirm-msg"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeM('m-confirm')">ยกเลิก</button>
+      <button class="btn btn-danger" id="confirm-ok">🗑️ ลบ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  DATA  (นำเข้าจาก Google Sheet ทุก Sheet)
+// ─────────────────────────────────────────────
+let DB = [
+  {
+    id:'EMP001', title:'Mr.', firstName:'THIAGO', middleName:'', lastName:'RODRIGUES DA SILVA',
+    gender:'M', nationality:'BRAZILIAN', birthDate:'1996-01-06',
+    wp:{ issueDate:'2025-09-08', expiryDate:'2026-05-31', status:'Under Renewal', caseStatus:'appointment', assignedTo:'', nextAction:'', notes:'' },
+    visa:{ type:'Non-B "1 year"', issueDate:'2026-08-30', expiryDate:'2026-08-31', visaStatus:'Active', caseStatus:'Approved', assignedTo:'', nextAction:'', notes:'' },
+    report:{ lastDate:'2026-07-06', notes:'' }
+  },
+  {
+    id:'EMP002', title:'Mr.', firstName:'ALEX FLAVIO', middleName:'', lastName:'SANTOS LUZ',
+    gender:'M', nationality:'BRAZILIAN', birthDate:'1993-01-21',
+    wp:{ issueDate:'2025-09-10', expiryDate:'2026-06-30', status:'Under Renewal', caseStatus:'appointment', assignedTo:'', nextAction:'', notes:'' },
+    visa:{ type:'Non-B "1 year"', issueDate:'2025-12-30', expiryDate:'2026-08-30', visaStatus:'Active', caseStatus:'Approved', assignedTo:'', nextAction:'', notes:'' },
+    report:{ lastDate:'2026-07-06', notes:'' }
+  },
+  {
+    id:'EMP003', title:'Mr.', firstName:'AMARILDO', middleName:'', lastName:'DE ANDRADE PEDRO JUNIOR',
+    gender:'M', nationality:'BRAZILIAN', birthDate:'1999-12-23',
+    wp:{ issueDate:'2026-07-06', expiryDate:'2027-07-05', status:'Under Renewal', caseStatus:'Submitted', assignedTo:'', nextAction:'', notes:'' },
+    visa:{ type:'Non-B "1 year"', issueDate:'', expiryDate:'', visaStatus:'Under Renewal', caseStatus:'Submitted', assignedTo:'', nextAction:'', notes:'' },
+    report:{ lastDate:'2026-07-06', notes:'' }
+  },
+  {
+    id:'EMP004', title:'Mr.', firstName:'STEEVEN JEEL', middleName:'', lastName:'LANGIL',
+    gender:'M', nationality:'FRENCH', birthDate:'1988-03-04',
+    wp:{ issueDate:'2026-07-06', expiryDate:'2027-07-05', status:'Under Renewal', caseStatus:'Submitted', assignedTo:'', nextAction:'', notes:'' },
+    visa:{ type:'Non-B "1 year"', issueDate:'', expiryDate:'', visaStatus:'Under Renewal', caseStatus:'Submitted', assignedTo:'', nextAction:'', notes:'' },
+    report:{ lastDate:'2026-07-06', notes:'' }
+  }
+];
+
+let editEmpId = null;
+let editDocCtx = null; // {empId, docType}
+
+// ─────────────────────────────────────────────
+//  UTILS
+// ─────────────────────────────────────────────
+const TODAY = () => { const d=new Date(); d.setHours(0,0,0,0); return d; };
+const daysLeft = (ds) => {
+  if (!ds || ds === '0' || ds === 0) return null;
+  return Math.round((new Date(ds) - TODAY()) / 86400000);
+};
+const addDays = (ds, n) => {
+  const d = new Date(ds); d.setDate(d.getDate()+n);
+  return d.toISOString().split('T')[0];
+};
+const fmtDate = (ds) => {
+  if (!ds || ds==='0' || ds===0) return '—';
+  const d = new Date(ds);
+  if (isNaN(d)) return '—';
+  const mo=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return `${d.getDate()} ${mo[d.getMonth()]} ${d.getFullYear()+543}`;
+};
+
+const initials = (e) => {
+  const a = e.firstName.split(' ')[0][0]||'';
+  const b = e.lastName.split(' ')[0][0]||'';
+  return (a+b).toUpperCase();
+};
+const avClass = (e) => e.nationality==='FRENCH' ? 'avatar av-french' : 'avatar';
+const empCell = (e) => `
+  <div class="emp-cell">
+    <div class="${avClass(e)}">${initials(e)}</div>
+    <div><div class="emp-name">${e.firstName} ${e.lastName}</div>
+    <div class="emp-id">${e.id}</div></div>
+  </div>`;
+
+const daysLeftBadge = (days) => {
+  if (days === null) return '<span class="badge b-submitted">ไม่มีข้อมูล</span>';
+  if (days < 0)  return `<span class="badge b-expired">เกิน ${Math.abs(days)} วัน</span>`;
+  if (days === 0) return `<span class="badge b-expired">วันนี้!</span>`;
+  if (days <= 15) return `<span class="badge b-overdue">${days} วัน</span>`;
+  if (days <= 60) return `<span class="badge b-warn">${days} วัน</span>`;
+  return `<span class="badge b-active">${days} วัน</span>`;
+};
+
+const statusBadge = (s) => {
+  if (!s) return '';
+  const cls = {
+    'Active':'b-active','Under Renewal':'b-renewal','Expired':'b-expired',
+    'Overdue':'b-overdue','Upcoming':'b-upcoming','Normal':'b-normal',
+    'Approved':'b-approved','Submitted':'b-submitted','appointment':'b-warn'
+  };
+  return `<span class="badge ${cls[s]||'b-submitted'}">${s}</span>`;
+};
+
+const calcReportStatus = (lastDate) => {
+  if (!lastDate) return {nextDate:'', status:'—'};
+  const next = addDays(lastDate, 90);
+  const d = daysLeft(next);
+  let st = 'Normal';
+  if (d === null) st = '—';
+  else if (d < 0) st = 'Overdue';
+  else if (d <= 15) st = 'Upcoming';
+  return {nextDate: next, status: st};
+};
+
+const nextId = () => 'EMP' + String(DB.length+1).padStart(3,'0');
+
+// ─────────────────────────────────────────────
+//  NAV
+// ─────────────────────────────────────────────
+const PAGE_TITLES = {
+  dashboard:'ภาพรวมระบบ', employees:'รายชื่อพนักงาน',
+  workpermit:'ใบอนุญาตทำงาน (Work Permit)', visa:'วีซ่า (Visa)',
+  reporting:'รายงานตัว 90 วัน (TM47)', alerts:'การแจ้งเตือน'
+};
+
+function nav(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') === `nav('${id}')`) n.classList.add('active');
+  });
+  document.getElementById('page-title').textContent = PAGE_TITLES[id];
+  renderPage(id);
+}
+
+function renderPage(id) {
+  if (id==='dashboard') renderDash();
+  if (id==='employees') renderEmp();
+  if (id==='workpermit') renderWP();
+  if (id==='visa') renderVisa();
+  if (id==='reporting') renderReport();
+  if (id==='alerts') renderAlerts();
+}
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('last-update').textContent =
+    `${now.toLocaleDateString('th-TH')} ${now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}`;
+}
+
+// ─────────────────────────────────────────────
+//  ALERTS BUILDER
+// ─────────────────────────────────────────────
+function buildAlerts() {
+  const items = [];
+  DB.forEach(e => {
+    const name = `<strong>${e.firstName} ${e.lastName}</strong>`;
+    // WP
+    const wp_d = daysLeft(e.wp.expiryDate);
+    if (e.wp.expiryDate) {
+      if (wp_d !== null && wp_d < 0)
+        items.push({level:'danger', msg:`${name} — Work Permit <strong>หมดอายุแล้ว</strong> (${fmtDate(e.wp.expiryDate)})`});
+      else if (wp_d !== null && wp_d <= 60)
+        items.push({level:'warn', msg:`${name} — Work Permit จะหมดอายุใน <strong>${wp_d} วัน</strong> (${fmtDate(e.wp.expiryDate)})`});
+    }
+    // Visa
+    const visa_d = daysLeft(e.visa.expiryDate);
+    if (e.visa.expiryDate) {
+      if (visa_d !== null && visa_d < 0)
+        items.push({level:'danger', msg:`${name} — วีซ่า <strong>หมดอายุแล้ว</strong> (${fmtDate(e.visa.expiryDate)})`});
+      else if (visa_d !== null && visa_d <= 60)
+        items.push({level:'warn', msg:`${name} — วีซ่าจะหมดอายุใน <strong>${visa_d} วัน</strong> (${fmtDate(e.visa.expiryDate)})`});
+    } else if (e.visa.visaStatus === 'Under Renewal') {
+      items.push({level:'info', msg:`${name} — วีซ่าอยู่ระหว่าง <strong>Under Renewal</strong> (${e.visa.caseStatus})`});
+    }
+    // Report
+    const {nextDate, status} = calcReportStatus(e.report.lastDate);
+    const rpt_d = daysLeft(nextDate);
+    if (status === 'Overdue')
+      items.push({level:'danger', msg:`${name} — รายงานตัว <strong>เกินกำหนดแล้ว</strong> (ควรรายงาน ${fmtDate(nextDate)})`});
+    else if (status === 'Upcoming')
+      items.push({level:'warn', msg:`${name} — ต้องรายงานตัวภายใน <strong>${rpt_d} วัน</strong> (${fmtDate(nextDate)})`});
+  });
+  return items;
+}
+
+// ─────────────────────────────────────────────
+//  DASHBOARD
+// ─────────────────────────────────────────────
+function renderDash() {
+  updateClock();
+  const total = DB.length;
+  const wpIssue = DB.filter(e => { const d=daysLeft(e.wp.expiryDate); return (d!==null&&d<0)||(d!==null&&d<=60); }).length;
+  const visaRenewal = DB.filter(e => e.visa.visaStatus==='Under Renewal').length;
+  const rptIssue = DB.filter(e => { const {status}=calcReportStatus(e.report.lastDate); return status==='Overdue'||status==='Upcoming'; }).length;
+  const allOk = DB.filter(e => {
+    const wpD = daysLeft(e.wp.expiryDate);
+    const vD  = daysLeft(e.visa.expiryDate);
+    const {status} = calcReportStatus(e.report.lastDate);
+    return (wpD===null||wpD>60) && (vD===null||vD>60) && status==='Normal';
+  }).length;
+
+  document.getElementById('stat-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-label">พนักงานทั้งหมด</div>
+      <div class="stat-value">${total}</div><div class="stat-sub">ในระบบ</div></div>
+    <div class="stat-card" style="border-left:3px solid #e24b4a">
+      <div class="stat-label">Work Permit แจ้งเตือน</div>
+      <div class="stat-value">${wpIssue}</div>
+      <div class="stat-sub">${wpIssue===0?'<span class="g">ปกติทุกคน ✓</span>':'<span class="w">ต้องดำเนินการ</span>'}</div></div>
+    <div class="stat-card" style="border-left:3px solid #ef9f27">
+      <div class="stat-label">Visa Under Renewal</div>
+      <div class="stat-value">${visaRenewal}</div>
+      <div class="stat-sub">${visaRenewal>0?`<span class="w">${visaRenewal} คนอยู่ระหว่างต่อ</span>`:'<span class="g">ปกติทุกคน ✓</span>'}</div></div>
+    <div class="stat-card" style="border-left:3px solid #3b6d11">
+      <div class="stat-label">รายงานตัวมีปัญหา</div>
+      <div class="stat-value">${rptIssue}</div>
+      <div class="stat-sub">${rptIssue===0?'<span class="g">ปกติทุกคน ✓</span>':`<span class="d">${rptIssue} คน ต้องรายงาน</span>`}</div></div>
+  `;
+
+  // Top alerts (max 5)
+  const alerts = buildAlerts();
+  document.getElementById('top-alerts').innerHTML = alerts.length===0
+    ? '<div style="font-size:12px;color:var(--text-3);padding:4px 0">✅ ไม่มีการแจ้งเตือนในขณะนี้</div>'
+    : alerts.slice(0,5).map(a=>`
+        <div class="alert-row ${a.level}">
+          <span class="alert-icon">${a.level==='danger'?'🔴':a.level==='warn'?'🟡':'🔵'}</span>
+          <span>${a.msg}</span>
+        </div>`).join('');
+
+  // Expiry upcoming
+  const upcoming = [];
+  DB.forEach(e => {
+    const items = [
+      {label:'Work Permit', date:e.wp.expiryDate},
+      {label:'Visa', date:e.visa.expiryDate},
+      {label:'รายงานตัว', date:calcReportStatus(e.report.lastDate).nextDate}
+    ];
+    items.forEach(({label,date}) => {
+      const d = daysLeft(date);
+      if (d !== null && d >= 0 && d <= 90)
+        upcoming.push({name:e.firstName, label, date, days:d});
+    });
+  });
+  upcoming.sort((a,b)=>a.days-b.days);
+  document.getElementById('expiry-list').innerHTML = upcoming.length===0
+    ? '<div class="empty">ไม่มีเอกสารหมดอายุภายใน 90 วัน 🎉</div>'
+    : upcoming.map(u => {
+        const pct = Math.round((1-u.days/90)*100);
+        const c = u.days<=15?'#e24b4a':u.days<=60?'#ef9f27':'#3b6d11';
+        return `<div style="padding:7px 17px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:500">${u.name} <span class="badge b-info" style="font-size:9px">${u.label}</span></div>
+            <div style="font-size:10px;color:var(--text-3)">${fmtDate(u.date)}</div>
+            <div class="pbar"><div class="pbar-fill" style="width:${pct}%;background:${c}"></div></div>
+          </div>
+          <div style="font-size:12px;font-weight:600;color:${c};white-space:nowrap">${u.days}ว</div>
+        </div>`;
+      }).join('');
+
+  // Doc summary
+  const rows = [
+    {label:'Work Permit', fn:(e)=>e.wp.status},
+    {label:'Visa', fn:(e)=>e.visa.visaStatus},
+    {label:'รายงานตัว', fn:(e)=>calcReportStatus(e.report.lastDate).status}
+  ];
+  document.getElementById('doc-summary').innerHTML = rows.map(r => {
+    const counts = {};
+    DB.forEach(e => { const s=r.fn(e); counts[s]=(counts[s]||0)+1; });
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:11px">
+      <div style="width:86px;font-size:12px;color:var(--text-2);flex-shrink:0">${r.label}</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap">
+        ${Object.entries(counts).map(([s,n])=>`<span class="badge ${badgeCls(s)}">${s} <strong>${n}</strong></span>`).join('')}
+      </div></div>`;
+  }).join('');
+
+  // Dash table
+  document.getElementById('dash-tbody').innerHTML = DB.map(e=>`
+    <tr>
+      <td>${empCell(e)}</td>
+      <td style="font-size:11px">${e.nationality}</td>
+      <td>${statusBadge(e.wp.status)}</td>
+      <td>${statusBadge(e.wp.caseStatus)}</td>
+      <td>${statusBadge(e.visa.visaStatus)}</td>
+      <td>${statusBadge(e.visa.caseStatus)}</td>
+      <td>${statusBadge(calcReportStatus(e.report.lastDate).status)}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-xs" onclick="openEditEmp('${e.id}')">✏️</button>
+        <button class="btn btn-xs btn-danger" style="margin-left:3px" onclick="confirmDel('${e.id}')">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+function badgeCls(s) {
+  return {
+    'Active':'b-active','Under Renewal':'b-renewal','Expired':'b-expired',
+    'Normal':'b-normal','Upcoming':'b-upcoming','Overdue':'b-overdue',
+    'Approved':'b-approved','Submitted':'b-submitted','appointment':'b-warn','—':'b-submitted'
+  }[s]||'b-submitted';
+}
+
+// ─────────────────────────────────────────────
+//  EMPLOYEES
+// ─────────────────────────────────────────────
+function renderEmp() {
+  const q=(document.getElementById('emp-q')?.value||'').toLowerCase();
+  const nat=document.getElementById('emp-nat')?.value||'';
+  const list=DB.filter(e=>{
+    const full=`${e.firstName} ${e.lastName} ${e.id}`.toLowerCase();
+    return (!q||full.includes(q))&&(!nat||e.nationality===nat);
+  });
+  document.getElementById('emp-tbody').innerHTML = list.map((e,i)=>`
+    <tr>
+      <td style="color:var(--text-3);font-size:11px">${i+1}</td>
+      <td>${empCell(e)}</td>
+      <td>${e.nationality}</td>
+      <td>${e.gender==='M'?'ชาย':'หญิง'}</td>
+      <td style="font-size:11px">${fmtDate(e.birthDate)}</td>
+      <td>${statusBadge(e.wp.status)}</td>
+      <td>${statusBadge(e.visa.visaStatus)}</td>
+      <td>${statusBadge(calcReportStatus(e.report.lastDate).status)}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-sm" onclick="openEditEmp('${e.id}')">✏️ แก้ไข</button>
+        <button class="btn btn-sm btn-danger" style="margin-left:4px" onclick="confirmDel('${e.id}')">🗑️</button>
+      </td>
+    </tr>`).join('')||'<tr><td colspan="9" class="empty">ไม่พบข้อมูล</td></tr>';
+}
+
+// ─────────────────────────────────────────────
+//  WORK PERMIT
+// ─────────────────────────────────────────────
+function renderWP() {
+  const q=(document.getElementById('wp-q')?.value||'').toLowerCase();
+  const sf=document.getElementById('wp-status-f')?.value||'';
+  const cf=document.getElementById('wp-case-f')?.value||'';
+  const list=DB.filter(e=>{
+    const full=`${e.firstName} ${e.lastName}`.toLowerCase();
+    return (!q||full.includes(q))&&(!sf||e.wp.status===sf)&&(!cf||e.wp.caseStatus===cf);
+  });
+  document.getElementById('wp-tbody').innerHTML = list.map(e=>{
+    const d=daysLeft(e.wp.expiryDate);
+    return `<tr>
+      <td>${empCell(e)}</td>
+      <td style="font-size:11px">${fmtDate(e.wp.issueDate)}</td>
+      <td style="font-size:11px">${fmtDate(e.wp.expiryDate)}</td>
+      <td>${daysLeftBadge(d)}</td>
+      <td>${statusBadge(e.wp.status)}</td>
+      <td>${statusBadge(e.wp.caseStatus)}</td>
+      <td style="font-size:11px">${e.wp.assignedTo||'—'}</td>
+      <td style="font-size:11px">${fmtDate(e.wp.nextAction)}</td>
+      <td style="font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.wp.notes||''}">${e.wp.notes||'—'}</td>
+      <td><button class="btn btn-xs" onclick="openEditDoc('${e.id}','wp')">✏️ แก้ไข</button></td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="10" class="empty">ไม่พบข้อมูล</td></tr>';
+}
+
+// ─────────────────────────────────────────────
+//  VISA
+// ─────────────────────────────────────────────
+function renderVisa() {
+  const q=(document.getElementById('visa-q')?.value||'').toLowerCase();
+  const sf=document.getElementById('visa-status-f')?.value||'';
+  const cf=document.getElementById('visa-case-f')?.value||'';
+  const list=DB.filter(e=>{
+    const full=`${e.firstName} ${e.lastName}`.toLowerCase();
+    return (!q||full.includes(q))&&(!sf||e.visa.visaStatus===sf)&&(!cf||e.visa.caseStatus===cf);
+  });
+  document.getElementById('visa-tbody').innerHTML = list.map(e=>{
+    const d=daysLeft(e.visa.expiryDate);
+    return `<tr>
+      <td>${empCell(e)}</td>
+      <td style="font-size:11px">${e.visa.type||'—'}</td>
+      <td style="font-size:11px">${fmtDate(e.visa.issueDate)}</td>
+      <td style="font-size:11px">${fmtDate(e.visa.expiryDate)}</td>
+      <td>${daysLeftBadge(d)}</td>
+      <td>${statusBadge(e.visa.visaStatus)}</td>
+      <td>${statusBadge(e.visa.caseStatus)}</td>
+      <td style="font-size:11px">${e.visa.assignedTo||'—'}</td>
+      <td style="font-size:11px">${fmtDate(e.visa.nextAction)}</td>
+      <td style="font-size:11px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.visa.notes||''}">${e.visa.notes||'—'}</td>
+      <td><button class="btn btn-xs" onclick="openEditDoc('${e.id}','visa')">✏️ แก้ไข</button></td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="11" class="empty">ไม่พบข้อมูล</td></tr>';
+}
+
+// ─────────────────────────────────────────────
+//  90 DAYS REPORT
+// ─────────────────────────────────────────────
+function renderReport() {
+  const q=(document.getElementById('rpt-q')?.value||'').toLowerCase();
+  const sf=document.getElementById('rpt-status-f')?.value||'';
+  const list=DB.filter(e=>{
+    const full=`${e.firstName} ${e.lastName}`.toLowerCase();
+    const {status}=calcReportStatus(e.report.lastDate);
+    return (!q||full.includes(q))&&(!sf||status===sf);
+  });
+  document.getElementById('rpt-tbody').innerHTML = list.map(e=>{
+    const {nextDate,status}=calcReportStatus(e.report.lastDate);
+    const d=daysLeft(nextDate);
+    return `<tr>
+      <td>${empCell(e)}</td>
+      <td style="font-size:11px">${fmtDate(e.report.lastDate)}</td>
+      <td style="font-size:11px">${fmtDate(nextDate)}</td>
+      <td>${daysLeftBadge(d)}</td>
+      <td>${statusBadge(status)}</td>
+      <td style="font-size:11px">${e.report.notes||'—'}</td>
+      <td><button class="btn btn-xs" onclick="openEditDoc('${e.id}','report')">✏️ อัปเดต</button></td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="7" class="empty">ไม่พบข้อมูล</td></tr>';
+}
+
+// ─────────────────────────────────────────────
+//  ALERTS PAGE
+// ─────────────────────────────────────────────
+function renderAlerts() {
+  const a=buildAlerts();
+  document.getElementById('all-alerts').innerHTML = a.length===0
+    ? '<div class="empty">✅ ไม่มีการแจ้งเตือนในขณะนี้</div>'
+    : a.map(x=>`<div class="alert-row ${x.level}" style="margin-top:6px">
+        <span class="alert-icon">${x.level==='danger'?'🔴':x.level==='warn'?'🟡':'🔵'}</span>
+        <span>${x.msg}</span></div>`).join('');
+}
+
+// ─────────────────────────────────────────────
+//  MODAL HELPERS
+// ─────────────────────────────────────────────
+const openM  = (id) => document.getElementById(id).classList.add('open');
+const closeM = (id) => document.getElementById(id).classList.remove('open');
+document.querySelectorAll('.modal-overlay').forEach(o=>
+  o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); }));
+
+// ─────────────────────────────────────────────
+//  ADD / EDIT EMPLOYEE
+// ─────────────────────────────────────────────
+function openAddEmp() {
+  editEmpId = null;
+  document.getElementById('m-emp-title').textContent = 'เพิ่มพนักงานใหม่';
+  ['e-title','e-nat','e-fn','e-mn','e-ln','e-gen','e-bdate',
+   'e-wp-iss','e-wp-exp','e-wp-st','e-wp-cs','e-wp-assigned','e-wp-next','e-wp-notes',
+   'e-visa-type','e-visa-iss','e-visa-exp','e-visa-st','e-visa-cs','e-visa-assigned','e-visa-next','e-visa-notes',
+   'e-rpt-last','e-rpt-notes'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  openM('m-emp');
+}
+
+function openEditEmp(id) {
+  editEmpId = id;
+  const e = DB.find(x=>x.id===id); if(!e) return;
+  document.getElementById('m-emp-title').textContent = 'แก้ไขข้อมูลพนักงาน';
+  const set=(fid,v)=>{ const el=document.getElementById(fid); if(el) el.value=v||''; };
+  set('e-title',e.title); set('e-nat',e.nationality); set('e-fn',e.firstName);
+  set('e-mn',e.middleName); set('e-ln',e.lastName); set('e-gen',e.gender); set('e-bdate',e.birthDate);
+  set('e-wp-iss',e.wp.issueDate); set('e-wp-exp',e.wp.expiryDate); set('e-wp-st',e.wp.status);
+  set('e-wp-cs',e.wp.caseStatus); set('e-wp-assigned',e.wp.assignedTo);
+  set('e-wp-next',e.wp.nextAction); set('e-wp-notes',e.wp.notes);
+  set('e-visa-type',e.visa.type); set('e-visa-iss',e.visa.issueDate); set('e-visa-exp',e.visa.expiryDate);
+  set('e-visa-st',e.visa.visaStatus); set('e-visa-cs',e.visa.caseStatus);
+  set('e-visa-assigned',e.visa.assignedTo); set('e-visa-next',e.visa.nextAction); set('e-visa-notes',e.visa.notes);
+  set('e-rpt-last',e.report.lastDate); set('e-rpt-notes',e.report.notes);
+  openM('m-emp');
+}
+
+function saveEmp() {
+  const fn = document.getElementById('e-fn').value.trim().toUpperCase();
+  const ln = document.getElementById('e-ln').value.trim().toUpperCase();
+  if (!fn||!ln) { alert('กรุณากรอกชื่อและนามสกุล'); return; }
+  const g = (id) => document.getElementById(id)?.value||'';
+  const rec = {
+    id: editEmpId || nextId(),
+    title:g('e-title'), firstName:fn, middleName:g('e-mn').toUpperCase(),
+    lastName:ln, gender:g('e-gen'), nationality:g('e-nat').toUpperCase(), birthDate:g('e-bdate'),
+    wp:{ issueDate:g('e-wp-iss'), expiryDate:g('e-wp-exp'), status:g('e-wp-st'),
+         caseStatus:g('e-wp-cs'), assignedTo:g('e-wp-assigned'), nextAction:g('e-wp-next'), notes:g('e-wp-notes') },
+    visa:{ type:g('e-visa-type'), issueDate:g('e-visa-iss'), expiryDate:g('e-visa-exp'),
+           visaStatus:g('e-visa-st'), caseStatus:g('e-visa-cs'), assignedTo:g('e-visa-assigned'),
+           nextAction:g('e-visa-next'), notes:g('e-visa-notes') },
+    report:{ lastDate:g('e-rpt-last'), notes:g('e-rpt-notes') }
+  };
+  if (editEmpId) { const i=DB.findIndex(x=>x.id===editEmpId); if(i>=0) DB[i]=rec; }
+  else DB.push(rec);
+  closeM('m-emp');
+  renderPage(document.querySelector('.page.active').id.replace('page-',''));
+}
+
+// ─────────────────────────────────────────────
+//  EDIT DOC (per-document modal)
+// ─────────────────────────────────────────────
+function openEditDoc(empId, docType) {
+  editDocCtx = {empId, docType};
+  const e = DB.find(x=>x.id===empId); if(!e) return;
+  const titles = {wp:'แก้ไข Work Permit', visa:'แก้ไข Visa', report:'อัปเดตรายงานตัว 90 วัน'};
+  document.getElementById('m-doc-title').textContent = titles[docType];
+
+  let html = '';
+  if (docType === 'wp') {
+    html = `
+      <div class="form-group"><label class="form-label">Issue Date</label><input type="date" id="d-wp-iss" value="${e.wp.issueDate||''}"></div>
+      <div class="form-group"><label class="form-label">Expiry Date</label><input type="date" id="d-wp-exp" value="${e.wp.expiryDate||''}"></div>
+      <div class="form-group"><label class="form-label">Status</label>
+        <select id="d-wp-st"><option${e.wp.status==='Active'?' selected':''}>Active</option>
+        <option${e.wp.status==='Under Renewal'?' selected':''}>Under Renewal</option>
+        <option${e.wp.status==='Expired'?' selected':''}>Expired</option></select></div>
+      <div class="form-group"><label class="form-label">Case Status</label>
+        <select id="d-wp-cs"><option${e.wp.caseStatus==='Submitted'?' selected':''}>Submitted</option>
+        <option${e.wp.caseStatus==='appointment'?' selected':''}>appointment</option>
+        <option${e.wp.caseStatus==='Approved'?' selected':''}>Approved</option></select></div>
+      <div class="form-group"><label class="form-label">Assigned To</label><input type="text" id="d-wp-assigned" value="${e.wp.assignedTo||''}"></div>
+      <div class="form-group"><label class="form-label">Next Action Date</label><input type="date" id="d-wp-next" value="${e.wp.nextAction||''}"></div>
+      <div class="form-group full"><label class="form-label">Notes</label><input type="text" id="d-wp-notes" value="${e.wp.notes||''}"></div>`;
+  } else if (docType === 'visa') {
+    html = `
+      <div class="form-group full"><label class="form-label">Visa Type</label>
+        <select id="d-visa-type">
+          <option${e.visa.type==='Non-B "1 year"'?' selected':''}>Non-B "1 year"</option>
+          <option${e.visa.type==='Non-B "2 year"'?' selected':''}>Non-B "2 year"</option>
+          <option${e.visa.type==='Non-O'?' selected':''}>Non-O</option>
+          <option${e.visa.type==='Non-IM'?' selected':''}>Non-IM</option>
+        </select></div>
+      <div class="form-group"><label class="form-label">Issue Date</label><input type="date" id="d-visa-iss" value="${e.visa.issueDate||''}"></div>
+      <div class="form-group"><label class="form-label">Expiry Date</label><input type="date" id="d-visa-exp" value="${e.visa.expiryDate||''}"></div>
+      <div class="form-group"><label class="form-label">Visa Status</label>
+        <select id="d-visa-st">
+          <option${e.visa.visaStatus==='Active'?' selected':''}>Active</option>
+          <option${e.visa.visaStatus==='Under Renewal'?' selected':''}>Under Renewal</option>
+          <option${e.visa.visaStatus==='Expired'?' selected':''}>Expired</option>
+        </select></div>
+      <div class="form-group"><label class="form-label">Case Status</label>
+        <select id="d-visa-cs">
+          <option${e.visa.caseStatus==='Approved'?' selected':''}>Approved</option>
+          <option${e.visa.caseStatus==='Submitted'?' selected':''}>Submitted</option>
+        </select></div>
+      <div class="form-group"><label class="form-label">Assigned To</label><input type="text" id="d-visa-assigned" value="${e.visa.assignedTo||''}"></div>
+      <div class="form-group"><label class="form-label">Next Action Date</label><input type="date" id="d-visa-next" value="${e.visa.nextAction||''}"></div>
+      <div class="form-group full"><label class="form-label">Notes</label><input type="text" id="d-visa-notes" value="${e.visa.notes||''}"></div>`;
+  } else if (docType === 'report') {
+    html = `
+      <div class="form-group full"><label class="form-label">Last Report Date (วันรายงานตัวล่าสุด)</label>
+        <input type="date" id="d-rpt-last" value="${e.report.lastDate||''}"></div>
+      <div class="form-group full"><label class="form-label">Notes</label>
+        <input type="text" id="d-rpt-notes" value="${e.report.notes||''}"></div>
+      <div class="form-group full" style="background:var(--blue-bg);padding:10px;border-radius:6px;margin-top:4px">
+        <div style="font-size:11px;color:var(--blue-t)">📌 Next Report Date จะถูกคำนวณอัตโนมัติ = Last Report Date + 90 วัน</div>
+      </div>`;
+  }
+  document.getElementById('doc-form-content').innerHTML = html;
+  openM('m-doc');
+}
+
+function saveDoc() {
+  const {empId, docType} = editDocCtx;
+  const idx = DB.findIndex(x=>x.id===empId); if(idx<0) return;
+  const g = (id) => document.getElementById(id)?.value||'';
+  if (docType==='wp') {
+    DB[idx].wp = { issueDate:g('d-wp-iss'), expiryDate:g('d-wp-exp'), status:g('d-wp-st'),
+      caseStatus:g('d-wp-cs'), assignedTo:g('d-wp-assigned'), nextAction:g('d-wp-next'), notes:g('d-wp-notes') };
+  } else if (docType==='visa') {
+    DB[idx].visa = { type:g('d-visa-type'), issueDate:g('d-visa-iss'), expiryDate:g('d-visa-exp'),
+      visaStatus:g('d-visa-st'), caseStatus:g('d-visa-cs'), assignedTo:g('d-visa-assigned'),
+      nextAction:g('d-visa-next'), notes:g('d-visa-notes') };
+  } else if (docType==='report') {
+    DB[idx].report = { lastDate:g('d-rpt-last'), notes:g('d-rpt-notes') };
+  }
+  closeM('m-doc');
+  renderPage(document.querySelector('.page.active').id.replace('page-',''));
+}
+
+// ─────────────────────────────────────────────
+//  DELETE
+// ─────────────────────────────────────────────
+function confirmDel(id) {
+  const e = DB.find(x=>x.id===id);
+  document.getElementById('confirm-msg').innerHTML =
+    `ลบข้อมูลของ <strong>${e.firstName} ${e.lastName}</strong> ออกจากระบบ?<br>การดำเนินการนี้ไม่สามารถยกเลิกได้`;
+  document.getElementById('confirm-ok').onclick = () => {
+    DB = DB.filter(x=>x.id!==id);
+    closeM('m-confirm');
+    renderPage(document.querySelector('.page.active').id.replace('page-',''));
+  };
+  openM('m-confirm');
+}
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+renderDash();
+</script>
+</body>
+</html>
+HTMLEOF
+echo "Done"
+Output
+
+Done
+Done
